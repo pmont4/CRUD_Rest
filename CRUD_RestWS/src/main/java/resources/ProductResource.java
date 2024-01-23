@@ -34,6 +34,7 @@ public class ProductResource implements Serializable {
     }
 
     @GET
+    @Path("list")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllProducts() {
         return Response.ok(
