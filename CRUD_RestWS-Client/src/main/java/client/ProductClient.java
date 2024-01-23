@@ -17,7 +17,7 @@ import org.glassfish.jersey.client.ClientConfig;
 
 public class ProductClient {
     
-    private static final String BASE_URI = "http://localhost:8080/CRUD_RestWS/crud/products";
+    private static final String BASE_URI_PRODUCTS = "http://localhost:8080/CRUD_RestWS/crud/products";
     
     private static final ClientConfig clientConfig = new ClientConfig();
     private static final Client client = ClientBuilder.newClient(clientConfig);
@@ -54,7 +54,9 @@ public class ProductClient {
     */
     
     public ArrayList<Product> getProductList() {
-        WebTarget target = client.target(BASE_URI).path("list");
+        WebTarget target = client.target(BASE_URI_PRODUCTS)
+                .path("list");
+        
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON);
         
         Response response = invocationBuilder.get();
