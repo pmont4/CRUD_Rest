@@ -1,7 +1,5 @@
 package controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import entity.Product;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +15,6 @@ public class ProductController {
     
     private static List<Product> getProductList() {
         return productList;
-    }
-    
-    private ObjectMapper getObjectMapper() {
-        return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     }
     
     static {
@@ -44,16 +38,14 @@ public class ProductController {
         return new ArrayList<>(productList);
     }
     
-    public int add(@NonNull Product product) {
+    public boolean add(@NonNull Product product) {
         if (getProductList().stream().anyMatch(p -> !Objects.equals(p.getId(), product.getId()))) {
             int newId = getProductList().get(getProductList().size() - 1).getId() + 1;
             
             product.setId(newId);
-            productList.add(product);
-            
-            return newId;
+            return productList.add(product);
         }
-        return 0;
+        return false;
     }
     
     public Optional<Product> get(int id) {
