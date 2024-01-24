@@ -71,4 +71,22 @@ public class ProductClient {
         }
     }
     
+    public Product getProduct(int id) {
+        WebTarget target = client.target(BASE_URI_PRODUCTS)
+                .path("get/" + id);
+                
+        Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON);
+        
+        Response response = invocationBuilder.get();
+        String json;
+        if (response.getStatus() == 200) {
+             json = response.readEntity(String.class);
+             Product product = this.convertFromJson(json, new TypeReference<Product>() {});
+             
+             return product;
+        } else {
+            return null;
+        }    
+    }
+    
 }
