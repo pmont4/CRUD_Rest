@@ -19,13 +19,15 @@ public class ProductClient {
     
     private static final String BASE_URI_PRODUCTS = "http://localhost:8080/CRUD_RestWS/crud/products";
     
-    private static final ClientConfig clientConfig = new ClientConfig();
-    private static final Client client = ClientBuilder.newClient(clientConfig);
+    private final ClientConfig clientConfig;
+    private final Client client;
     
     private static ProductClient instance;
     
     private ProductClient() {
         super();
+        this.clientConfig = new ClientConfig();
+        this.client = ClientBuilder.newClient(clientConfig);
     }
     
     public static ProductClient getInstance() {
