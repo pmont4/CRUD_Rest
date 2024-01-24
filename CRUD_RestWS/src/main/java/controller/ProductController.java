@@ -40,7 +40,7 @@ public class ProductController {
     
     public boolean add(@NonNull Product product) {
         if (getProductList().stream().anyMatch(p -> !Objects.equals(p.getId(), product.getId()))) {
-            int newId = getProductList().get(getProductList().size() - 1).getId() + 1;
+            Integer newId = getProductList().get(getProductList().size() - 1).getId() + 1;
             
             product.setId(newId);
             return productList.add(product);
@@ -54,7 +54,7 @@ public class ProductController {
     
     public boolean update(@NonNull Product product) {
         if (this.get(product.getId()).isPresent()) {
-            int index = productList.indexOf(this.get(product.getId()).get());
+            Integer index = productList.indexOf(this.get(product.getId()).get());
             productList.set(index, product);
             return true;
         } else {
