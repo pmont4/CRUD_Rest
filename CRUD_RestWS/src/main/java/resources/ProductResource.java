@@ -1,8 +1,7 @@
 package resources;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.core.type.TypeReference;
 import controller.ProductController;
 import entity.Product;
 import jakarta.ws.rs.Consumes;
@@ -20,6 +19,7 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
+import util.JsonUtil;
 
 @Path("products")
 public class ProductResource implements Serializable {
@@ -28,10 +28,6 @@ public class ProductResource implements Serializable {
 
     @Getter
     private final ProductController P_CONTROLLER = ProductController.getInstance();
-
-    private ObjectMapper getObjectMapper() {
-        return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-    }
 
     @GET
     @Path("list")
@@ -46,12 +42,18 @@ public class ProductResource implements Serializable {
     @Path("get/{id}")
     @Produces({"application/json", "text/plain"})
     public Response getProduct(@PathParam("id") int id) {
+        Response toReturn;
+        
         if (this.getP_CONTROLLER().get(id).isPresent()) {
             Product product = this.getP_CONTROLLER().get(id).get();
-            return Response.ok(product, MediaType.APPLICATION_JSON).build();
+            toReturn = Response.ok(
+                    product, MediaType.APPLICATION_JSON
+            ).build();
         } else {
-            return Response.status(Status.NOT_FOUND).entity("The ID of the product wasn't found in the product list.").build();
+            toReturn = Response.status(Status.NOT_FOUND).entity("The ID of the product wasn't found in the product list.").build();
         }
+        
+        return toReturn;
     }
 
     @POST
@@ -59,40 +61,43 @@ public class ProductResource implements Serializable {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({"application/json", "text/plain"})
     public Response addProduct(String json) {
+        Response toReturn = null;
+        
         try {
-            Product product = this.getObjectMapper().readValue(json, Product.class);
+            Product product = JsonUtil.getInstance().getFromJson(json, new TypeReference<Product>(){
+            });
+            
             if (this.getP_CONTROLLER().add(product)) {
-                return Response.ok(this.getP_CONTROLLER().getAll(), MediaType.APPLICATION_JSON).build();
+                toReturn = Response.ok(
+                        this.getP_CONTROLLER().getAll(), MediaType.APPLICATION_JSON
+                ).build();
             } else {
-                return Response.status(Status.NOT_IMPLEMENTED).entity("The product couldn't be added.").build();
+                toReturn = Response.status(Status.NOT_IMPLEMENTED).entity("The product couldn't be added.").build();
             }
         } catch (JsonProcessingException ex) {
             Logger.getLogger(ProductResource.class.getName()).log(Level.SEVERE, null, ex);
-            
         }
         
-        return Response.status(Status.NOT_IMPLEMENTED).entity("The product couldn't be added.").build();
+        return toReturn;
     }
 
     @DELETE
     @Path("remove/{id}")
     @Produces({"application/json", "text/plain"})
     public Response removeProduct(@PathParam("id") int id) {
+        Response toReturn = null;
+        
         if (this.getP_CONTROLLER().get(id).isPresent()) {
             if (this.getP_CONTROLLER().delete(id)) {
-                try {
-                    return Response.ok(
-                            this.getObjectMapper().writeValueAsString(this.getP_CONTROLLER().getAll())
-                    ).build();
-                } catch (JsonProcessingException ex) {
-                    Logger.getLogger(ProductResource.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                toReturn = Response.ok(
+                        this.getP_CONTROLLER().getAll(), MediaType.APPLICATION_JSON
+                ).build();
             }
         } else {
-            return Response.status(Status.NOT_FOUND).entity("The ID of the product wasn't found in the product list.").build();
+            toReturn = Response.status(Status.NOT_FOUND).entity("The ID of the product wasn't found in the product list.").build();
         }
 
-        return Response.status(Status.NOT_FOUND).build();
+        return toReturn;
     }
 
     @PUT
@@ -100,20 +105,24 @@ public class ProductResource implements Serializable {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response modifyProduct(String json) {
+        Response toReturn = null;
+        
         try {
-            Product product = this.getObjectMapper().readValue(json, Product.class);
+            Product product = JsonUtil.getInstance().getFromJson(json, new TypeReference<Product>(){
+            });
+            
             if (this.getP_CONTROLLER().update(product)) {
-                return Response.ok(
-                        this.getP_CONTROLLER().getAll(), MediaType.APPLICATION_JSON)
-                        .build();
+                toReturn = Response.ok(
+                        this.getP_CONTROLLER().getAll(), MediaType.APPLICATION_JSON
+                ).build();
             } else {
-                return Response.status(Status.NOT_FOUND).entity("The id of the product wasn't found in the product list.").build();
+                toReturn = Response.status(Status.NOT_FOUND).entity("The id of the product wasn't found in the product list.").build();
             }
         } catch (JsonProcessingException ex) {
             Logger.getLogger(ProductResource.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        return Response.notModified().build();
+        return toReturn;
     }
 
 }

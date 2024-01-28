@@ -2,7 +2,6 @@ package client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import entity.Product;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -16,6 +15,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.glassfish.jersey.client.ClientConfig;
+import util.JsonUtil;
 
 public class ProductClient implements Serializable {
     
@@ -44,17 +44,6 @@ public class ProductClient implements Serializable {
 
     private ArrayList<Product> productList;
 
-    private <T> T convertFromJson(String json, TypeReference<T> type) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(json, type);
-        } catch (JsonProcessingException ex) {
-            Logger.getLogger(ProductClient.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return null;
-    }
-
     /*
         Request from API
      */
@@ -69,8 +58,12 @@ public class ProductClient implements Serializable {
             String json;
             if (response.getStatus() == 200) {
                 json = response.readEntity(String.class);
-                productList = this.convertFromJson(json, new TypeReference<ArrayList<Product>>() {
-                });
+                try {
+                    productList = JsonUtil.getInstance().getFromJson(json, new TypeReference<ArrayList<Product>>(){
+                    });
+                } catch (JsonProcessingException ex) {
+                    Logger.getLogger(ProductClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
 
                 return productList;
             } else {
@@ -89,14 +82,22 @@ public class ProductClient implements Serializable {
             String json;
             if (response.getStatus() == 200) {
                 json = response.readEntity(String.class);
-                Product product = this.convertFromJson(json, new TypeReference<Product>() {
-                });
+                Product product;
+                try {
+                    product = JsonUtil.getInstance().getFromJson(json, new TypeReference<Product>(){
+                    });
+                    
+                    return product;
+                } catch (JsonProcessingException ex) {
+                    Logger.getLogger(ProductClient.class.getName()).log(Level.SEVERE, null, ex);
+                }
 
-                return product;
             } else {
                 return null;
             }
         }
+        
+        return null;
     }
 
     public String addProduct(String name, Float price) {
