@@ -1,2 +1,2 @@
 # CRUD_Rest
- CRUD con API rest
+Rest CLIENT-API application for CRUD operations made with JERSEY
